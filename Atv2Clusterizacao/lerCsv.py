@@ -33,19 +33,18 @@ df['Cluster'] = best_labels
 
 plt.figure(figsize=(12, 6))
 plt.scatter(df.iloc[:, 0], df.iloc[:, 1], c=df['Cluster'], cmap='viridis', s=50, alpha=0.7)
-plt.xlabel('Ano')  # Altere conforme as suas colunas
-plt.ylabel('País')  # Altere conforme as suas colunas
+plt.xlabel('Ano')  
+plt.ylabel('País')  
 plt.title('Distribuição dos Clusters')
 plt.colorbar(label='Cluster')
 plt.show()
 
-# Gráfico 2: Gráfico de dispersão com cores diferentes para cada cluster
 plt.figure(figsize=(12, 6))
 for cluster in set(best_labels):
     cluster_data = df[df['Cluster'] == cluster]
     plt.scatter(cluster_data.iloc[:, 0], cluster_data.iloc[:, 1], label=f'Cluster {cluster}')
-plt.xlabel('Ano')  # Altere conforme as suas colunas
-plt.ylabel('País')  # Altere conforme as suas colunas
+plt.xlabel('Ano')  
+plt.ylabel('País')  
 plt.title('Clusters Encontrados')
 plt.legend()
 plt.show()
