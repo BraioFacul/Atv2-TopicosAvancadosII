@@ -1,12 +1,12 @@
 import pandas as pd
-import numpy as np
+import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans, DBSCAN
 from sklearn.metrics import silhouette_score, davies_bouldin_score
-import matplotlib.pyplot as plt
+import numpy as np  # Importação do numpy necessária
 
 # Carregar o dataset
-df = pd.read_csv('C:/Users/BRYAN/PycharmProjects/Atv2Clusterizacao/climate_change_impact_on_agriculture_2024.csv')
+df = pd.read_csv('Atv2Clusterizacao/climate_change_impact_on_agriculture_2024.csv')
 
 # Pré-processamento (remover NaN, normalizar variáveis)
 df = df.dropna()
@@ -21,13 +21,10 @@ kmeans_labels = kmeans.fit_predict(scaled_df)
 dbscan = DBSCAN(eps=0.5, min_samples=5)
 dbscan_labels = dbscan.fit_predict(scaled_df)
 
-# Calcular métricas de avaliação
-kmeans_silhouette = silhouette_score(scaled_df, kmeans_labels)
-kmeans_db_score = davies_bouldin_score(scaled_df, kmeans_labels)
-dbscan_silhouette = silhouette_score(scaled_df, dbscan_labels) if len(set(dbscan_labels)) > 1 else -1
-dbscan_db_score = davies_bouldin_score(scaled_df, dbscan_labels) if len(set(dbscan_labels)) > 1 else -1
-
 # Escolher o melhor algoritmo
+kmeans_silhouette = silhouette_score(scaled_df, kmeans_labels)
+dbscan_silhouette = silhouette_score(scaled_df, dbscan_labels) if len(set(dbscan_labels)) > 1 else -1
+
 if kmeans_silhouette > dbscan_silhouette:
     best_model = kmeans
     best_labels = kmeans_labels
@@ -37,15 +34,25 @@ else:
     best_labels = dbscan_labels
     best_name = 'DBSCAN'
 
-# Aplicar o melhor modelo novamente
+# Adicionar coluna de clusters ao dataframe
 df['Cluster'] = best_labels
 
-# Selecionar apenas colunas numéricas para as estatísticas
-numeric_df = df.select_dtypes(include=[np.number])
-cluster_stats = numeric_df.groupby('Cluster').agg(['mean', 'std', 'min', 'max'])
+# Gráfico 1: Distribuição de clusters usando K-Means ou DBSCAN
+plt.figure(figsize=(12, 6))
+plt.scatter(df.iloc[:, 0], df.iloc[:, 1], c=df['Cluster'], cmap='viridis', s=50, alpha=0.7)
+plt.xlabel('Feature 1')  # Altere conforme as suas colunas
+plt.ylabel('Feature 2')  # Altere conforme as suas colunas
+plt.title('Distribuição dos Clusters')
+plt.colorbar(label='Cluster')
+plt.show()
 
-# Mostrar resultados
-print(f'Melhor algoritmo: {best_name}')
-print(f'Silhouette Score: {silhouette_score(scaled_df, best_labels)}')
-print(f'Davies-Bouldin Score: {davies_bouldin_score(scaled_df, best_labels)}')
-print(cluster_stats)
+# Gráfico 2: Gráfico de dispersão com cores diferentes para cada cluster
+plt.figure(figsize=(12, 6))
+for cluster in set(best_labels):
+    cluster_data = df[df['Cluster'] == cluster]
+    plt.scatter(cluster_data.iloc[:, 0], cluster_data.iloc[:, 1], label=f'Cluster {cluster}')
+plt.xlabel('Feature 1')  # Altere conforme as suas colunas
+plt.ylabel('Feature 2')  # Altere conforme as suas colunas
+plt.title('Clusters Encontrados')
+plt.legend()
+plt.show()
