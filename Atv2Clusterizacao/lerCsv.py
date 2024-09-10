@@ -2,10 +2,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans, DBSCAN
-from sklearn.metrics import silhouette_score
+from sklearn.metrics import silhouette_score, davies_bouldin_score
 import numpy as np  
 
-# Carregar o dataset
+# Carregar o dataset (substitua pela URL da base de dados se necessário)
 df = pd.read_csv('Atv2Clusterizacao/climate_change_impact_on_agriculture_2024.csv')
 
 # Pré-processamento (remover NaN, normalizar variáveis)
@@ -24,6 +24,15 @@ dbscan_labels = dbscan.fit_predict(scaled_df)
 # Calcular métricas de avaliação
 kmeans_silhouette = silhouette_score(scaled_df, kmeans_labels)
 dbscan_silhouette = silhouette_score(scaled_df, dbscan_labels) if len(set(dbscan_labels)) > 1 else -1
+
+kmeans_db_score = davies_bouldin_score(scaled_df, kmeans_labels)
+dbscan_db_score = davies_bouldin_score(scaled_df, dbscan_labels) if len(set(dbscan_labels)) > 1 else -1
+
+# Mostrar métricas de avaliação
+print(f'K-Means Silhouette Score: {kmeans_silhouette}')
+print(f'K-Means Davies-Bouldin Score: {kmeans_db_score}')
+print(f'DBSCAN Silhouette Score: {dbscan_silhouette}')
+print(f'DBSCAN Davies-Bouldin Score: {dbscan_db_score}')
 
 # Escolher o melhor algoritmo
 if kmeans_silhouette > dbscan_silhouette:
@@ -61,3 +70,13 @@ plt.ylabel('País')
 plt.title('Clusters Encontrados')
 plt.legend()
 plt.show()
+
+# Selecionar apenas colunas numéricas para as estatísticas
+numeric_df = df.select_dtypes(include=[np.number])
+
+# Gerar estatísticas descritivas (média, desvio padrão, mínimo e máximo) para cada cluster
+cluster_stats = numeric_df.groupby('Cluster').agg(['mean', 'std', 'min', 'max'])
+
+# Mostrar estatísticas descritivas
+print('Estatísticas descritivas dos clusters:')
+print(cluster_stats)
